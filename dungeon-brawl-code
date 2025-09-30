@@ -1,0 +1,117 @@
+import random
+
+# ---------------- Player Class ----------------
+class Player():
+    def __init__(self, name, hp=100, attack_power=5):
+        self.name = name
+        self.hp = hp
+        self.attack_power = attack_power
+        self.special_uses = 2  # limit special attacks
+
+    def attack(self, target):
+        damage = random.randint(self.attack_power - 2, self.attack_power + 2)
+        target.take_damage(damage)
+        print(f"{self.name} swings sword ⚔️ and hits {target.name} for {damage} damage!")
+
+    def special_attack(self, target):
+        if self.special_uses > 0:
+            damage = self.attack_power * 2
+            target.take_damage(damage)
+            self.special_uses -= 1
+            print(f"{self.name} uses a SPECIAL ATTACK 💥 on {target.name} for {damage} damage!")
+        else:
+            print(f"{self.name} has no special attacks left!")
+
+    def heal(self, amount):
+        self.hp += amount
+        if self.hp > 100:
+            self.hp = 100
+        print(f"{self.name} drinks a potion 🧪 and heals {amount} HP! Current HP: {self.hp}")
+
+    def take_damage(self, amount):
+        self.hp -= amount
+        if self.hp < 0:
+            self.hp = 0
+        print(f"{self.name} got hit 😵 for {amount} damage! HP left: {self.hp}")
+
+    def is_alive(self):
+        return self.hp > 0
+
+    def display_status(self):
+        print(f"{self.name} | HP: {self.hp} | Attack: {self.attack_power} | Specials left: {self.special_uses}")
+
+
+# ---------------- Monster Class ----------------
+class Monster():
+    def __init__(self, name, hp=80, attack_power=6):
+        self.name = name
+        self.hp = hp
+        self.attack_power = attack_power
+        self.special_uses = 1  # monsters get fewer specials for balance
+
+    def attack(self, target):
+        damage = random.randint(self.attack_power - 2, self.attack_power + 2)
+        target.take_damage(damage)
+        print(f"{self.name} attacks ferociously 😈 and hits {target.name} for {damage} damage!")
+
+    def special_attack(self, target):
+        if self.special_uses > 0:
+            damage = self.attack_power * 2
+            target.take_damage(damage)
+            self.special_uses -= 1
+            print(f"{self.name} unleashes a SPECIAL ATTACK 🔥 on {target.name} for {damage} damage!")
+        else:
+            self.attack(target)  # fallback to normal attack
+
+    def take_damage(self, amount):
+        self.hp -= amount
+        if self.hp < 0:
+            self.hp = 0
+        print(f"{self.name} takes {amount} damage! HP left: {self.hp}")
+
+    def is_alive(self):
+        return self.hp > 0
+
+    def display_status(self):
+        print(f"{self.name} | HP: {self.hp} | Attack: {self.attack_power} | Specials left: {self.special_uses}")
+
+
+# ---------------- Game Loop ----------------
+player = Player("Leenzy")
+monster = Monster("Dragon")
+
+print("⚔️ Welcome to Dungeon Brawl! ⚔️\n")
+
+while player.is_alive() and monster.is_alive():
+    # Show current HP
+    player.display_status()
+    monster.display_status()
+    
+    # Player turn
+    move = input("\nChoose your move: attack / special / heal: ").lower()
+    
+    if move == "attack":
+        player.attack(monster)
+    elif move == "special":
+        player.special_attack(monster)
+    elif move == "heal":
+        player.heal(20)  # can tweak heal amount
+    else:
+        print("Invalid move! Try again.")
+        continue  # repeat turn if input invalid
+    
+    # Check if monster is dead
+    if not monster.is_alive():
+        print(f"\n🎉 {monster.name} is defeated! You win! 🏆")
+        break
+    
+    # Monster turn
+    if monster.special_uses > 0 and random.choice([True, False]):
+        monster.special_attack(player)
+    else:
+        monster.attack(player)
+    
+    # Check if player is dead
+    if not player.is_alive():
+        print(f"\n💀 {player.name} has been defeated! Game Over!")
+        break
